@@ -110,13 +110,17 @@ app.get('/api/users/:_id/logs', (req, res) => {
   var {from, to, limit} = req.query;
   User.findById(id, (err, data) => {
     if(err) return console.log(err)
-    var logs = [...data.log]
+    let logs = [...data.log]
+    
+    logs = logs.map(exer => {
+      var dateFormatted = new Date(exer.date).toDateString();
+      console.log(typeof dateFormatted)
+      return {
+        "description": exer.description, 
+        "duration": exer.duration,
+        "date": dateFormatted}
+    })
 
-    logs = logs.sort((a, b) => a.date > b.date).map(x => ({
-      description: x.description,
-      duration: x.duration,
-      date: x.date
-    }))
     var counts = logs.length;
     
     if(from || to){
@@ -131,7 +135,7 @@ app.get('/api/users/:_id/logs', (req, res) => {
       fromDate = fromDate.getTime()
       toDate = toDate.getTime()
       logs = logs.filter((session) => {
-        let sessionDate = new Date(session.date).getTime()
+        var sessionDate = new Date(session.date).getTime()
         return sessionDate >= fromDate && sessionDate <= toDate 
       })
     }
